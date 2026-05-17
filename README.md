@@ -1,7 +1,6 @@
 ## This file belongs to Garima Soni
 ### Welcome to Garima Soni's Technical Writing Portfolio 
 
-Finance Background: 
 1. Simplifying Complex Financial Frameworks:
 2. API Documentation:
 3. Troubleshooting Guide:
