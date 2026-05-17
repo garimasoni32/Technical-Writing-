@@ -1,13 +1,17 @@
-# CCAR Market Risk Feed: Core Technical Specification
+# CCAR Market Risk Feed: Core API Documentation Specification
 Version: 4.2.0
 
-Domain: Risk Management & Regulatory Capital Reporting (FR Y-14A/Q Compliance)
+Domain: Risk Management & Regulatory Capital Reporting (FR Y-14A/Q Compliance) 
+
 Architecture Style: REST Gateway with Async Worker Processing
+
 Core Stack: Python 3.11+ (FastAPI + Pydantic) | Enterprise Object-Relational Layer (QzTable Pattern)
 
-1. System Architecture Overview
-The CCAR Market Risk Ingestion system utilizes an asynchronous decoupled architecture. The database interaction bypasses raw relational string writing, relying instead on an Object-Relational Data Context that abstracts transaction persistence and row mappings into unified runtime instances.
+1. **System Architecture Overview**
 
+   The CCAR Market Risk Ingestion system utilizes an asynchronous decoupled architecture. The database interaction bypasses raw relational string writing, relying instead on an Object-       Relational Data Context that abstracts transaction persistence and row mappings into unified runtime instances.
+
+```
 [Upstream Desk] ──(HTTP POST JSON)──> [FastAPI Gateway] (Sync Pydantic Schema Check)
                                              │
                                        (Returns 202 Accepted & Job ID)
@@ -19,24 +23,27 @@ The CCAR Market Risk Ingestion system utilizes an asynchronous decoupled archite
                                              │
                                              ▼
                                     [Object Data Matrix] ──> [QzTable Persistence Engine]
+```
 
-2. External API Interface Specification
-Endpoint: Submit Daily Risk Exposures
-HTTP Method: POST
+2. **External API Interface Specification**
+   
+   Endpoint: Submit Daily Risk Exposures
 
-Path: /api/v4/risk-feeds/ccar/submit
+   HTTP Method: POST
 
-Protocol Requirement: HTTPS with Content-Encoding: gzip enabled for payloads > 10MB.
+   Path: /api/v4/risk-feeds/ccar/submit
 
-Global Request Headers
+   Protocol Requirement: HTTPS with Content-Encoding: gzip enabled for payloads > 10MB.
 
-| Header |	Type	| Required |	Description |
-|--------:|------------------|-----------------------|-----------------------|
-|Content-Type |	string |	Yes | 	Must be explicitly set to application/json. |
-| X-Reporting-LEI |	string	| Yes	| Legal Entity Identifier (LEI) of the submitting bank subsidiary. |
-|X-Idempotency-Key|	string |	Yes	| UUIDv4 to eliminate duplicate processing loops on network retries. |
+   **Global Request Headers**
 
-JSON Request Payload Schema
+   | Header |	Type	| Required |	Description |
+   |--------:|------------------|-----------------------|-----------------------|
+   |Content-Type |	string |	Yes | 	Must be explicitly set to application/json. |
+   | X-Reporting-LEI |	string	| Yes	| Legal Entity Identifier (LEI) of the submitting bank subsidiary. |
+   |X-Idempotency-Key|	string |	Yes	| UUIDv4 to eliminate duplicate processing loops on network retries. |
+
+   **JSON Request Payload Schema**
 
 ```python
 {
@@ -57,8 +64,9 @@ JSON Request Payload Schema
   ]
 }
 ```
-3. Python Validation & Gateway Pipeline
-The validation layer utilizes Pydantic data schemas to enforce structural type constraints on intake before mapping data downstream into database model entities.
+3. **Python Validation & Gateway Pipeline**
+   
+    The validation layer utilizes Pydantic data schemas to enforce structural type constraints on intake before mapping data downstream into database model entities.
 ```python
 from typing import List
 from datetime import date
@@ -103,7 +111,7 @@ class CCARPayload(BaseModel):
         return value
  ```
 
-API Endpoint Handler
+**API Endpoint Handler**
 ```
 @app.post("/api/v4/risk-feeds/ccar/submit", status_code=status.HTTP_202_ACCEPTED)
 async def ingest_market_risk_feed(
@@ -128,8 +136,9 @@ async def ingest_market_risk_feed(
         raise HTTPException(status_code=500, detail=f"Internal Broker Queue Failure: {str(e)}")
 ```
 
-4. Object-Oriented Database Layer & QzTable Engine
-Rather than executing raw text strings or tracking connections over manual transactional SQL units, data objects inherit from an active-record declarative model container (QzTable).
+4. **Object-Oriented Database Layer & QzTable Engine**
+   
+   Rather than executing raw text strings or tracking connections over manual transactional SQL units, data objects inherit from an active-record declarative model container (QzTable).
 ```python
 Object Schema Definition
 
@@ -162,8 +171,10 @@ class FactCCARMarketRisk(QzTable):
     processed_at: datetime = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 ```
 
-High-Throughput Object Batch Upsert Implementation
+**High-Throughput Object Batch Upsert Implementation**
+
 This execution engine handles the transaction implicitly through a session context (QzContext). Instead of unrolling multi-line INSERT ... ON CONFLICT scripts, it calls an explicit state-merge routine natively supported by the object framework layer.
+
 ```python
 def db_batch_upsert_worker(context: QzContext, lei: str, reporting_date: date, scenario: str, risk_nodes: list):
     """
@@ -198,8 +209,10 @@ def db_batch_upsert_worker(context: QzContext, lei: str, reporting_date: date, s
         )
 ```
 
-Analytical Object Queries Example
+**Analytical Object Queries Example**
+
 This displays how downstream analytical calculators extract the structured records using Object-Oriented model properties instead of executing native SQL string select lookups.
+
 ``` python
 def fetch_high_exposure_books(context: QzContext, target_date: date, scenario: str) -> list[FactCCARMarketRisk]:
     """
@@ -218,9 +231,12 @@ def fetch_high_exposure_books(context: QzContext, target_date: date, scenario: s
     return query.all()
 ```
 
-5. API Response Definitions
-HTTP 202 Accepted (Asynchronous Job Created)
-Returned when raw payload structural parameters are confirmed clean by the Pydantic parser.
+5. **API Response Definitions**
+
+   **HTTP 202 Accepted (Asynchronous Job Created)**
+   
+   Returned when raw payload structural parameters are confirmed clean by the Pydantic parser.
+   
 ```python
 {
   "ingestion_job_id": "job_20260517_9921_ax3",
@@ -229,8 +245,10 @@ Returned when raw payload structural parameters are confirmed clean by the Pydan
   "uri_callback": "/api/v4/risk-feeds/ccar/jobs/job_20260517_9921_ax3/status"
 }
 ```
-HTTP 422 Unprocessable Entity (Semantic Validation Failure)
-Returned synchronously if the payload breaks structural constraints defined within the Pydantic layer models.
+   **HTTP 422 Unprocessable Entity (Semantic Validation Failure)**
+   
+  Returned synchronously if the payload breaks structural constraints defined within the Pydantic layer models.
+  
 ```python
 {
   "detail": [
