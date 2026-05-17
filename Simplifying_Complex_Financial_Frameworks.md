@@ -1,4 +1,4 @@
-## Simplifying Complex Financial Risk Frameworks
+# Simplifying Complex Financial Risk Frameworks
 
 **Objective:** To bridge the gap between high-level financial engineering and cross-functional stakeholders (HR, Marketing, or Junior Devs).
 
