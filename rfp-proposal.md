@@ -1,5 +1,18 @@
-# PROJECT PROPOSAL: HEAL THROUGH POETRY
-## Format: Documentary Web Series (6 Episodes x 25 mins)
+# Project: Funded Grant Proposal – "Heal Through Poetry"
+
+**Role:** Technical & Grant Writer (Creative Director & Operations Lead)
+
+**Objective:** Translate raw creative concepts, personal anecdotes, and logistical plans into a structured, persuasive Request for Proposal (RFP) for the TELUS STORYHIVE Web Series Program.
+
+**Impact & Result:** Successfully secured full production funding, industry mentorship, and distribution on TELUS Optik TV.
+
+**Project Overview:**
+
+This document showcases the ability to synthesize artistic vision with rigid grant compliance guidelines. By balancing a deeply personal narrative framework with clear technical specifications—such as episode breakdowns, specific camera mechanics (Rembrandt lighting, macro lenses), and regional logistics—the proposal met all eligibility criteria while maintaining a compelling, human-centric tone. Read the winning proposal below.
+
+
+## PROJECT PROPOSAL: HEAL THROUGH POETRY
+### Format: Documentary Web Series (6 Episodes x 25 mins)
 
 Total Runtime: 150 Minutes
 
