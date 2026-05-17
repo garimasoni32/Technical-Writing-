@@ -2,11 +2,12 @@
 ### Welcome to Garima Soni's Technical Writing Portfolio 
 
 Finance Background: 
-1. API Documentation: Developers Onboarding 
-2. Release Plan:
-3. Release Notes:
-4. Internal Developer Status Notes:
-5. Troubleshooting Guide: 
+1. Simplifying Complex Financial Frameworks:
+3. API Documentation: 
+4. Release Plan:
+5. Release Notes:
+6. Internal Developer Status Notes:
+7. Troubleshooting Guide: 
 
 
 Creative Background:
