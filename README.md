@@ -6,7 +6,7 @@ Finance Background:
 3. API Documentation: 
 4. Release Plan:
 5. Release Notes:
-6. Internal Developer Status Notes:
+6. Sprint Notes:
 7. Troubleshooting Guide: 
 
 
