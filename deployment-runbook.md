@@ -1,4 +1,4 @@
-## Production Release Plan: Core Platform Update (v4.2.0)
+# Production Release Plan: Core Platform Update (v4.2.0)
 ### Execution Date: May 26, 2026
 
 Author: Garima Soni 
