@@ -1,21 +1,93 @@
-# Project Title: Heal Through Poetry
-Genre: Documentary
-Logline: 
-Poets residing in BC tackles the stigma of mental health issues through creative outlet - poetry and music. 
-Synopsis: 
-Christine Bisonette - a poet residing in BC has anxiety and depression and the way she handles is through a creative outlet - poetry. Alex, a poet residing in BC has autism and the way they handle is through their creative outlet - poetry and music. This documentary web series will have 6 episodes in the drama genre, where each episode starts with a visual representation of a poem and an interview with the poet, where they tell their story and talk about the process of writing poetry and how poetry and music help them. They practice the healing process through breathing and writing exercises. 
-Project Runtime: 150 minutes
+# PROJECT PROPOSAL: HEAL THROUGH POETRY
+## Format: Documentary Web Series (6 Episodes x 25 mins)
+
+Total Runtime: 150 Minutes
+
+Genre: Documentary / Drama
+
+Target Funding Body: TELUS STORYHIVE
+
+Production Location: British Columbia (BC), Canada
+
+1. Project Summary
+
+Logline
+
+Poets residing in British Columbia tackle the persistent stigma of mental health and neurodivergence through their creative sanctuaries: poetry and music.
+
+Synopsis
+
+Heal Through Poetry is a poignant 6-episode documentary web series that explores the therapeutic power of artistic expression. The series centers on two BC-based creators: Christine Bisonette, a poet navigating anxiety and depression through the written word, and Alex, an autistic poet and musician who processes the world through rhythm and verse. Each episode beautifully blends cinematic visual poetry with intimate interviews, charting the artists' creative processes and personal triumphs. Rather than seeking to "cure" these conditions, the series spotlights healing through actionable mindfulness, including breathing and writing exercises, showing audiences how to live a content, authentic life.
+
+Episode Breakdown:
+
+Episode 1: Christine’s Sanctuary – Focuses on Christine Bisonette’s journey with anxiety, depression, and poetry.
+
+Episode 2: Alex’s Rhythm – Explores Alex’s life as an autistic poet and musician navigating a neurotypical world.
+
+Episode 3: The Gathering Place – Showcases the Vancouver Poetry House and its vital contribution to the local arts community.
+
+Episode 4: The BC Horizon – Reflects on shifting community perspectives regarding mental health across British Columbia.
+
+Episode 5: The Expert Lens – A conversation with a BC-based professional mental health expert on practical wellness exercises.
+
+Episode 6: The Practice of Healing – A guided, interactive episode featuring breathing and writing exercises led by Christine Bisonette.
+
+2. Project Vision & Creative Style
+
+Visuals and Setting:
+
+The series will rely on a distinct dual-visual language to juxtapose internal emotional states with external realities:
+
+The Interviews: 
+
+Filmed in intimate settings (apartments/home offices) utilizing low-key Rembrandt lighting with Medium Close-Up (MCU) and Close-Up (CU) framing to create an atmosphere of safety, vulnerability, and depth.
+
+The Visual Poetry: 
+
+Shot using macro lenses and a Cinema Verité approach. These segments will capture the poets in motion—engaging in everyday activities that bring them peace, set against the natural backdrops of BC’s local parks and urban streets.
+
+Archival Integration: 
+
+The narrative will be enriched using personal archival photos and videos of the poets performing, alongside childhood photographs to establish a deep sense of history and nostalgia.
+
+3. Community Relevancy & Impact
+
 Community Relevancy:
-I believe this story is important to all of us, as mental health issues are still considered taboo in some communities and if more people would talk about it and accept it as we do in communities in BC, it would not only uplift our community but it would inspire other communities to also tell their story. Talking to these poets, and residing in BC has taught me that mental health issues are not something that we have to control and fix it. It is about learning how to accept and manage them in a way that could help us live our life contently.
+
+Mental health and neurodivergence remain heavily stigmatized or treated as taboos in various global and local pockets. By highlighting how progressive, empathetic communities in British Columbia talk about, accept, and integrate mental health conversations, this project serves as a blueprint. Heal Through Poetry shifts the narrative from "fixing or controlling" a condition to learning how to accept, manage, and live contentedly with it. It aims to inspire viewers inside and outside of BC to courageously step forward and share their own stories.
+
 Inclusion Statement:
-Heal Through Poetry is a female led initiative with female subjects in front of the camera and is going to reflect how a community in BC handles mental health issues. 
-Why do you want to make this project? Why is this project important to you? Why are you the best person to produce this project? What is your connection to the community involved?
-This topic is close to my heart as my younger sister has autism. She lives in India and sometimes I have seen people treat her badly and talk about her in a bad way because they don’t understand her. I suffer through anxiety myself so I understand the frustration when you are feeling an emotion that not a lot of people can understand. Being a filmmaker has allowed me to accept my insecurities and dig deep into myself. I want to make this documentary for people like us so that they feel that they belong in the world. 
-How are you going to tell your story?
-How are you going to tell your story? Please provide a brief description of your project's visuals, settings and style. For example, do you plan to incorporate animation, visual effects, archival footage, etc.?
-This documentary will have sitting interviews of poets with low-key Rembrandt lighting with Medium Close-up/Close-up shots. The visual representation of poetry is done with a macro lens with Cinema Verite of poets doing things that make them happy. There will be archival photos and videos of the poet performing and photos when they were younger. The documentary web series will have 6 episodes, First episode will represent Christine Bisonnette as a poet residing in BC who has anxiety and depression, Second episode will represent Alex as a poet residing in BC who has autism, Third episode will showcase Vancouver Poetry House and its contribution in poetry community in Vancouver, Fourth episode will reflect on views of the community in BC about mental health issues, Fifth episode will reflect on a conversation with Professional Mental Health expert in BC about practices we can apply for better health, Sixth episode will reflect breathing/writing exercises taught by Christine Bisonnette. 
-Please enter the potential filming locations that are OUTSIDE your community of residence, along with the percentage of your project that would be filmed there.
-Sitting interviews will be held at the apartment / home office. There will be visual outdoor shots at a park and streets.
-Production Experience
-Please provide more details on your experience as a producer. The Project Lead can be a first time producer/director/filmmaker. STORYHIVE funding is reserved for creators with zero to limited experience. Those with previous access to the broadcasting system or with distribution deals outside TELUS STORYHIVE are ineligible for funding. Please indicate if there are any areas in particular where you could benefit from mentorship, whether related to development, production, post-production, marketing or business affairs.
-I'm a first-time producer/director/filmmaker. I studied film production at Infocus Film School and graduated in Oct'2021, where I have learned cinematography, writing, directing, producing etc. I'm a portrait photographer residing in Vancouver and I have published a debut Poetry and Photography book in July 2022. I also work in Vancouver on indie film sets as a camera operator, camera assistant, BTS photographer and cinematographer. 
+
+Heal Through Poetry is a proudly female-led initiative both behind and in front of the camera. The production is dedicated to amplifying marginalized voices, ensuring authentic representation of female and neurodivergent perspectives, and accurately reflecting the diverse, inclusive fabric of the British Columbia filmmaking and arts community.
+
+4. Director/Producer Statement & Connection
+
+Why I Want to Make This Project:
+
+This project stems from a deeply personal space. My younger sister is autistic and lives in India, where I have frequently witnessed her face harsh judgment and mistreatment due to a lack of community understanding and education. Additionally, I navigate my own struggles with anxiety, intimately knowing the isolation of feeling emotions that those around you cannot comprehend.
+
+As a filmmaker, the camera has been my vessel for self-acceptance, allowing me to dig deep into my own vulnerabilities. I am making Heal Through Poetry for everyone who has ever felt misunderstood, ensuring they see themselves on screen and know, without a doubt, that they belong in this world.
+
+5. Production Experience & Eligibility
+   
+Creator Profile:
+I am an emerging, first-time producer, director, and filmmaker, making me uniquely suited for STORYHIVE’s mandate to support grassroots talent. I have no prior access to commercial broadcasting systems or external distribution deals.
+
+Education: Graduate of Infocus Film School (October 2021), with comprehensive training in cinematography, screenwriting, directing, and producing.
+
+Artistic Background: Professional portrait photographer based in Vancouver; author and publisher of a debut Poetry and Photography book (July 2022).
+
+Industry Experience: Active crew member within the Vancouver indie film community, working regularly as a camera operator, camera assistant, behind-the-scenes (BTS) photographer, and cinematographer.
+
+Areas for Mentorship:
+
+While my technical training in cinematography and directing is robust, as a first-time producer I would immensely benefit from STORYHIVE’s mentorship framework in the following areas:
+
+Production & Business Affairs: Budget management, insurance, and licensing.
+
+Post-Production Workflow: Managing multi-episode editing timelines and sound design integration.
+
+Marketing & Distribution: Maximizing web-series visibility, community outreach, and digital audience engagement.
+
+6. Location Logistics
