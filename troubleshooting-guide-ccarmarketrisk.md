@@ -155,4 +155,47 @@ class CCARFeedAnalyzer:
 
 5. Root Cause Playbook (Common Scenarios)
 
+| Symptoms	| Likely Root Cause |	Object-Layer Remediation Action |
+|-------------:|------------------------------|--------------------------------|
+|Diagnostics return 0 entries for today's context date; source file cannot be located. |	Upstream EOD Batch Delay	| Query upstream task monitors. Coordinate with middle-office operations to verify structural curve compilation states.|
+|Verification pipeline outputs Schema Drift Detected.|	Upstream System Release	A source model attribute was added or altered without altering the data contract.| Adjust your QzTable column configuration mappings to map around the change.
+|Z-score alerts trigger across Interest Rate Greeks.	|Bad Curve Ingestion / Missing Staging Data	| Zero-value discount factors due to broken benchmark parameters (e.g., SOFR). Cascade and clone yesterday's curve instances to restore calculations.|
+|Operational engine generates context timeout warnings.	| Database Lock / High Concurrency |	Resource starvation inside the persistence connection layer. Kill competing reporting threads using application session teardowns. |
+
+6. Fail-Safe Resolution Protocol
+
+   If structural file remediation cannot be established within your regulatory SLA reporting window, initiate the CCAR Business Continuity Protocol:1. Object Proxy FallbackIf approved by the Market Risk Methodology board, programmatically duplicate the previous business day's exposure entities ($T-1$) to serve as an emergency data proxy.
+  ```python 
+   def execute_emergency_proxy_fill(context, missing_date: date, fallback_date: date):
+    """Clones market risk entities from fallback to missing date window."""
+    historical_snapshot = (
+        MarketSensitivities.query(context)
+        .filter(MarketSensitivities.business_date == fallback_date)
+        .all()
+    )
+    
+    proxy_buffer = []
+    for old_record in historical_snapshot:
+        proxy_record = MarketSensitivities(
+            business_date=missing_date,
+            position_id=old_record.position_id,
+            asset_class=old_record.asset_class,
+            risk_factor_type=old_record.risk_factor_type,
+            risk_metric=old_record.risk_metric,
+            metric_value=old_record.metric_value
+        )
+        proxy_buffer.append(proxy_record)
+        
+    with context.begin_transaction():
+        # Atomically insert proxy tracking matrix via the entity context block
+        context.bulk_save_objects(proxy_buffer)
+        context.commit()
+    print(f"[SUCCESS] Ingested {len(proxy_buffer)} proxy records for processing date: {missing_date}")
+```
+
+2. Audit Tracking Ledger Signature
+   
+Log the incident inside the central CCAR Data Quality Ledger. Specify the percentage of total Risk-Weighted Assets (RWA) impacted by the fallback data to maintain compliance with Federal Reserve SR 15-18 and SR 11-7 validation rules.
+
+
 
