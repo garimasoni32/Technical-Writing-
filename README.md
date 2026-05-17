@@ -1,5 +1,5 @@
 
-### Welcome to Garima Soni's Technical Writing Portfolio 
+# Welcome to Garima Soni's Technical Writing Portfolio 
 
 1. Simplifying Complex Financial Frameworks:
 2. API Documentation:
