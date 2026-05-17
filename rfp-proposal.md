@@ -91,3 +91,11 @@ Post-Production Workflow: Managing multi-episode editing timelines and sound des
 Marketing & Distribution: Maximizing web-series visibility, community outreach, and digital audience engagement.
 
 6. Location Logistics
+
+   | Filming Location Type | Description / Purpose  | Estimated % of Production |
+   |-----------------:|------------------|----------------------------------|
+   |Interior / Home Office	| Controlled environment for intimate Rembrandt-lit interviews and writing sessions.	| 60% |
+   |Public Parks & Streets (BC) |	B-Roll, Cinema Verité footage, and outdoor visual poetry sequences.| 	30% |
+   |Vancouver Poetry House| 	Cultural hub location shooting for Episode 3.| 	10% |
+
+   
