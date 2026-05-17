@@ -26,7 +26,7 @@ This is the most basic risk. It’s the risk that a borrower—let's call him "J
 
 The **"Everything is Connected"** Chaos.
 
-Market risk isn't about one person failing; it's about the vibe of the whole economy. If interest rates spike tomorrow, everyone's mortgage gets more expensive. Suddenly, the value of the houses Canada Guaranty insured starts to wobble. It’s the risk that the "Market" changes the rules of the game while you’re still playing.
+Market risk isn't about one person failing; it's about the vibe of the whole economy. If interest rates spike tomorrow, everyone's mortgage gets more expensive. Suddenly, the value of the houses insured starts to wobble. It’s the risk that the "Market" changes the rules of the game while you’re still playing.
 
 5. ### **Liquidity Risk**
 
