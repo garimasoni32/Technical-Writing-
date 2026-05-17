@@ -39,7 +39,7 @@ Attendees: Frontend Team, Backend Team, DevOps, Product Management
    | None | Blocked |
 
 
-3. Technical Writing & Documentation Track
+3. **Technical Writing & Documentation Track**
 
    | Tasks          | Status           |
    |------:|---------------------------------------|
