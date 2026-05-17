@@ -66,4 +66,12 @@ Attendees: Frontend Team, Backend Team, DevOps, Product Management
    Awaiting backend fix on the hardware simulator to test and document the physical edge-case error codes.
 
 4. Key Decisions Made
-⚖️ Architecture Decision (ADR-014): The team agreed to handle partial failures in bulk API requests by returning a 207 Multi-Status HTTP response code code instead of failing the entire batch with a 400 Bad Request. This ensures valid scans are recorded even if one item in the payload contains an invalid barcode.
+   
+   ⚖️ Architecture Decision (ADR-014): The team agreed to handle partial failures in bulk API requests by returning a 207 Multi-Status HTTP response code code instead of failing the entire    batch with a 400 Bad Request. This ensures valid scans are recorded even if one item in the payload contains an invalid barcode.
+
+   | Task | Owner         | Due Date      | Status     | 
+   |-----:|---------------|---------------|------------|
+   |     Investigate staging environment 502 gateway errors |      @DevOps         | May 18, 2026 | 🔴 Open
+   |     Provide frontend team with exact JSON schemas for 207 responses|        @Backend-Lead       | May 18, 2026 | 🟢 Done
+   |     Review and approve technical documentation for the SDK migration |         @Product-Mgr      | May 18, 2026 | 🟡 In Review
+
