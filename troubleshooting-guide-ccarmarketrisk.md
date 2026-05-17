@@ -1,9 +1,8 @@
 # CCAR Market Risk Feed Failure: Incident Runbook & Troubleshooting Guide
-
-When a Comprehensive Capital Analysis and Review (CCAR) Market Risk feed fails, it directly impacts capital adequacy calculations, Stress Testing (9Q forward-looking projections), and regulatory compliance reporting. This runbook provides a structured, tier-based approach to diagnose, isolate, and remediate market risk data feed breaks using Python and SQL.
+When a Comprehensive Capital Analysis and Review (CCAR) Market Risk feed fails, it directly impacts capital adequacy calculations, Stress Testing (9Q forward-looking projections), and regulatory compliance reporting (FR Y-14A/Q). This runbook provides a structured framework to diagnose, isolate, and remediate market risk data feed breaks using an Object-Oriented Data Layer and Python.
 
 1. Triage & Impact Assessment (First 15 Minutes)
-Before jumping into the code, quickly assess the blast radius to determine if it is a Data Quality (DQ) anomaly or a Hard Upstream Ingestion Failure.
+Before jumping into the data layer, quickly assess the blast radius to determine if it is a Data Quality (DQ) anomaly or a Hard Upstream Ingestion Failure.
 
 Immediate Questions to Answer:
 Asset Classes Impacted: Is the failure isolated to specific desks (e.g., FX, Equities, Fixed Income) or universal?
@@ -12,221 +11,148 @@ Risk Metrics Missing: Are we missing standard sensitivities (Greeks), Value-at-R
 
 Upstream Status: Did the upstream EOD (End of Day) trading systems sign off?
 
-2. SQL Diagnostics: Isolating the Break
-Use these SQL scripts on your staging/ingestion database to identify where the data pipe ruptured.
+2. Object Schema Definition
+Downstream diagnostic utilities rely on two primary object-relational mappings representing the orchestration tracking layer (FeedLog) and the core risk metrics repository (MarketSensitivities).
+```python
+from datetime import datetime, date
+from decimal import Decimal
+from typing import Optional
+from database_provider import QzTable, Column, Integer, String, Date, Numeric, DateTime
+
+class FeedLog(QzTable):
+    """Object mapping representing the system data-ingestion orchestration ledger."""
+    __tablename__ = "feed_log"
+
+    id: Optional[int] = Column(Integer, primary_key=True, autoincrement=True)
+    feed_name: str = Column(String(100), nullable=False)
+    feed_type: str = Column(String(50), nullable=False)
+    business_date: date = Column(Date, nullable=False)
+    expected_arrival_time: datetime = Column(DateTime)
+    actual_arrival_time: Optional[datetime] = Column(DateTime)
+    record_count: int = Column(Integer, default=0)
+    status: str = Column(String(20), default="PENDING")
+
+
+class MarketSensitivities(QzTable):
+    """Object mapping representing actual ingested risk exposure fields."""
+    __tablename__ = "market_sensitivities"
+    __table_args__ = (
+        {"unique_constraints": [["business_date", "position_id", "risk_metric"]]},
+    )
+
+    id: Optional[int] = Column(Integer, primary_key=True, autoincrement=True)
+    business_date: date = Column(Date, nullable=False)
+    position_id: str = Column(String(50), nullable=False)
+    asset_class: str = Column(String(20), nullable=False)
+    risk_factor_type: str = Column(String(50), nullable=False)
+    risk_metric: str = Column(String(50), nullable=False)
+    metric_value: Decimal = Column(Numeric(18, 6), nullable=False)
+    last_updated_ts: datetime = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+```
+
+3. Programmatic Diagnostics: Isolating the Break
+Use these object-oriented query blocks within your analysis console to pinpoint where the pipeline ruptured.
 
 Step A: Identify Missing or Empty Feeds
-Check if files/feeds were recorded in the metadata orchestration layer but contain zero records or failed to load.
+Query the FeedLog object collection to isolate broken or un-arrived system entities.
+```python
+def check_active_feed_status(context, target_date: date):
+    """Queries the data ledger for missing or failed ingestion components."""
+    failed_feeds = (
+        FeedLog.query(context)
+        .filter(FeedLog.business_date == target_date)
+        .filter((FeedLog.status == "FAILED") | (FeedLog.record_count == 0))
+        .all()
+    )
+    
+    for feed in failed_feeds:
+        print(f"[CRITICAL] Feed Failure: {feed.feed_name} | "
+              f"Expected: {feed.expected_arrival_time} | Count: {feed.record_count}")
+    return failed_feeds
+```
 
-SELECT 
-    feed_name,
-    feed_type,
-    business_date,
-    expected_arrival_time,
-    actual_arrival_time,
-    record_count,
-    status
-FROM ccar_market_risk.feed_log
-WHERE business_date = CAST(GETDATE() AS DATE) -- Or your specific batch date
-  AND (status = 'FAILED' OR record_count = 0);
+Step B: Detect Stale ($T-1$) Data BuffersIf downstream models throw calculation alerts despite an ingestion status of SUCCESS, verify that the active memory layer didn't accidentally consume yesterday's run attributes.
+```python
+def audit_data_staleness(context, reporting_date: date):
+    """Audits record update bounds via model entity properties."""
+    summary_metrics = (
+        MarketSensitivities.query(context)
+        .filter(MarketSensitivities.business_date == reporting_date)
+        .all()
+    )
+    
+    # Analyze the record objects programmatically 
+    for record in summary_metrics[:5]:
+        if record.last_updated_ts.date() < reporting_date:
+            print(f"[WARNING] Stale Row Target Detached! "
+                  f"Position: {record.position_id} contains T-1 timestamp: {record.last_updated_ts}")
+```
 
-  Step B: Locate the Cutoff/Stale DataIf the feed status says "SUCCESS" but down-stream models are throwing errors, you likely have stale/duplicate data from the previous business day ($T-1$).
-
-  SELECT 
-    asset_class,
-    risk_factor_type,
-    COUNT(DISTINCT risk_factor_id) as unique_factors,
-    MIN(last_updated_ts) as oldest_record,
-    MAX(last_updated_ts) as newest_record
-FROM ccar_market_risk.market_sensitivities
-WHERE business_date = '2026-05-15' -- Target CCAR reporting date
-GROUP BY asset_class, risk_factor_type;
-
-Troubleshooting Note: If newest_record shows yesterday's timestamp, the ETL completed but didn't actually process new $T$ data.3. Python Automation: Data Reconciliation & Volatility SpikesWhen the feed does arrive but fails validation gates, it’s usually due to data corruption, schema drift, or extreme value anomalies (e.g., bad yield curve shifts).Use this Python script to ingest the raw feed file, check for critical data gaps, and flag abnormal variance compared to a historical baseline.
-
+4. Automation: Anomaly Verification & Outlier Isolation
+   
+When files load successfully but breach systemic limits, it usually signifies profile data corruption or extreme value anomalies (e.g., severe curve movements). This class-based routine maps raw input structures into entities, calculates historical variations, and isolates outliers.
+```python
 import pandas as pd
 import numpy as np
-import pyodbc # or sqlalchemy
 
-def troubleshoot_ccar_feed(file_path, conn_str):
-    print(f"[*] Initializing Analysis for Feed: {file_path}")
-    
-    # 1. Load Inbound Feed
-    try:
-        df_current = pd.read_csv(file_path)
-    except Exception as e:
-        return f"[CRITICAL] Failed to parse feed file. Possible corruption or Schema Drift: {str(e)}"
+class CCARFeedAnalyzer:
+    def __init__(self, context):
+        self.context = context
+
+    def process_and_validate_feed(self, file_path: str) -> Optional[pd.DataFrame]:
+        print(f"[*] Initializing Object Analytics for Feed: {file_path}")
         
-    # 2. Schema & Nullity Gate
-    critical_cols = ['position_id', 'asset_class', 'risk_metric', 'metric_value']
-    missing_cols = [col for col in critical_cols if col not in df_current.columns]
-    if missing_cols:
-        return f"[CRITICAL] Schema Drift Detected! Missing columns: {missing_cols}"
+        # 1. Ingest Raw Transport Vector
+        try:
+            df_current = pd.read_csv(file_path)
+        except Exception as e:
+            print(f"[CRITICAL] Structural File Parse Exception: {str(e)}")
+            return None
+            
+        # 2. Schema Guardrails
+        critical_fields = ['position_id', 'asset_class', 'risk_metric', 'metric_value']
+        if not all(col in df_current.columns for col in critical_fields):
+            print("[CRITICAL] Schema Drift Detected! File mapping definitions mismatched.")
+            return None
+
+        # 3. Object-Oriented Baseline Fetching
+        # Pull 30-day history as list of objects, convert directly to analytical reference framing
+        historical_records = (
+            self.context.query(MarketSensitivities)
+            .filter(MarketSensitivities.last_updated_ts >= datetime.utcnow() - pd.Timedelta(days=30))
+            .all()
+        )
         
-    null_counts = df_current[critical_cols].isnull().sum()
-    if null_counts.sum() > 0:
-        print(f"[WARNING] Null values found in critical fields:\n{null_counts[null_counts > 0]}")
-    
-    # 3. Fetch Historical Baseline from DB for Outlier Detection (Z-Score)
-    query = """
-        SELECT position_id, risk_metric, AVG(metric_value) as avg_val, STDEV(metric_value) as std_val 
-        FROM ccar_market_risk.historical_sensitivities
-        WHERE business_date >= DATEADD(day, -30, GETDATE())
-        GROUP BY position_id, risk_metric
-    """
-    
-    conn = pyodbc.connect(conn_str)
-    df_history = pd.read_sql(query, conn)
-    conn.close()
-    
-    # 4. Merge and Flag Anomalies
-    merged = pd.merge(df_current, df_history, on=['position_id', 'risk_metric'], how='left')
-    
-    # Avoid division by zero for fixed/low-risk metrics
-    merged['std_val'] = merged['std_val'].replace(0, np.nan) 
-    merged['z_score'] = (merged['metric_value'] - merged['avg_val']) / merged['std_val']
-    
-    # Threshold: Flag anything outside 4 Standard Deviations for CCAR investigation
-    anomalies = merged[merged['z_score'].abs() > 4.0]
-    
-    if not anomalies.empty:
-        print(f"\n[ALERT] Found {len(anomalies)} risk metric anomalies exceeding Z-Score threshold (>4 std dev):")
-        print(anomalies[['position_id', 'asset_class', 'risk_metric', 'metric_value', 'z_score']].head(10))
-        return anomalies
-        
-    print("[SUCCESS] Data reconciliation and anomaly checks passed.")
-    return None
+        if not historical_records:
+            print("[WARNING] Zero historical data points extracted from Object Context.")
+            return None
+            
+        df_history = pd.DataFrame([{
+            'position_id': r.position_id,
+            'risk_metric': r.risk_metric,
+            'metric_value': float(r.metric_value)
+        } for r in historical_records])
 
-# Example Execution:
-# anomalies_df = troubleshoot_ccar_feed('T_market_risk_feed.csv', 'DRIVER={SQL Server};SERVER=risk_db;DATABASE=ccar;UID=usr;PWD=pwd')
+        # 4. Statistical Distribution Aggregations
+        df_stats = df_history.groupby(['position_id', 'risk_metric'])['metric_value'].agg(['mean', 'std']).reset_index()
+        df_stats.columns = ['position_id', 'risk_metric', 'avg_val', 'std_val']
 
-4. Root Cause Playbook (Common Scenarios)
+        # 5. Volatility Profiling (Z-Score Execution)
+        merged = pd.merge(df_current, df_stats, on=['position_id', 'risk_metric'], how='left')
+        merged['std_val'] = merged['std_val'].replace(0, np.nan)
+        merged['z_score'] = (merged['metric_value'] - merged['avg_val']) / merged['std_val']
 
-| Rank | THING-TO-RANK |
-|-----:|---------------|
+        # Isolate entries exceeding 4 Standard Deviations
+        anomalies = merged[merged['z_score'].abs() > 4.0]
+        if not anomalies.empty:
+            print(f"\n[ALERT] Found {len(anomalies)} risk anomalies breaching Z-Score Limits (>4.0):")
+            return anomalies[['position_id', 'asset_class', 'risk_metric', 'metric_value', 'z_score']]
 
-CCAR Market Risk Feed Failure: Incident Runbook & Troubleshooting Guide
-When a Comprehensive Capital Analysis and Review (CCAR) Market Risk feed fails, it directly impacts capital adequacy calculations, Stress Testing (9Q forward-looking projections), and regulatory compliance reporting. This runbook provides a structured, tier-based approach to diagnose, isolate, and remediate market risk data feed breaks using Python and SQL.
+        print("[SUCCESS] CCAR target data objects passed distribution checks.")
+        return None
+```
 
-1. Triage & Impact Assessment (First 15 Minutes)
-Before jumping into the code, quickly assess the blast radius to determine if it is a Data Quality (DQ) anomaly or a Hard Upstream Ingestion Failure.
+5. Root Cause Playbook (Common Scenarios)
 
-Immediate Questions to Answer:
-Asset Classes Impacted: Is the failure isolated to specific desks (e.g., FX, Equities, Fixed Income) or universal?
-
-Risk Metrics Missing: Are we missing standard sensitivities (Greeks), Value-at-Risk (VaR) vectors, or Stress Scenario PnL?
-
-Upstream Status: Did the upstream EOD (End of Day) trading systems sign off?
-
-2. SQL Diagnostics: Isolating the Break
-Use these SQL scripts on your staging/ingestion database to identify where the data pipe ruptured.
-
-Step A: Identify Missing or Empty Feeds
-Check if files/feeds were recorded in the metadata orchestration layer but contain zero records or failed to load.
-
-SQL
-SELECT 
-    feed_name,
-    feed_type,
-    business_date,
-    expected_arrival_time,
-    actual_arrival_time,
-    record_count,
-    status
-FROM ccar_market_risk.feed_log
-WHERE business_date = CAST(GETDATE() AS DATE) -- Or your specific batch date
-  AND (status = 'FAILED' OR record_count = 0);
-Step B: Locate the Cutoff/Stale Data
-If the feed status says "SUCCESS" but down-stream models are throwing errors, you likely have stale/duplicate data from the previous business day (T−1).
-
-SQL
-SELECT 
-    asset_class,
-    risk_factor_type,
-    COUNT(DISTINCT risk_factor_id) as unique_factors,
-    MIN(last_updated_ts) as oldest_record,
-    MAX(last_updated_ts) as newest_record
-FROM ccar_market_risk.market_sensitivities
-WHERE business_date = '2026-05-15' -- Target CCAR reporting date
-GROUP BY asset_class, risk_factor_type;
-Troubleshooting Note: If newest_record shows yesterday's timestamp, the ETL completed but didn't actually process new T data.
-
-3. Python Automation: Data Reconciliation & Volatility Spikes
-When the feed does arrive but fails validation gates, it’s usually due to data corruption, schema drift, or extreme value anomalies (e.g., bad yield curve shifts).
-
-Use this Python script to ingest the raw feed file, check for critical data gaps, and flag abnormal variance compared to a historical baseline.
-
-Python
-import pandas as pd
-import numpy as np
-import pyodbc # or sqlalchemy
-
-def troubleshoot_ccar_feed(file_path, conn_str):
-    print(f"[*] Initializing Analysis for Feed: {file_path}")
-    
-    # 1. Load Inbound Feed
-    try:
-        df_current = pd.read_csv(file_path)
-    except Exception as e:
-        return f"[CRITICAL] Failed to parse feed file. Possible corruption or Schema Drift: {str(e)}"
-        
-    # 2. Schema & Nullity Gate
-    critical_cols = ['position_id', 'asset_class', 'risk_metric', 'metric_value']
-    missing_cols = [col for col in critical_cols if col not in df_current.columns]
-    if missing_cols:
-        return f"[CRITICAL] Schema Drift Detected! Missing columns: {missing_cols}"
-        
-    null_counts = df_current[critical_cols].isnull().sum()
-    if null_counts.sum() > 0:
-        print(f"[WARNING] Null values found in critical fields:\n{null_counts[null_counts > 0]}")
-    
-    # 3. Fetch Historical Baseline from DB for Outlier Detection (Z-Score)
-    query = """
-        SELECT position_id, risk_metric, AVG(metric_value) as avg_val, STDEV(metric_value) as std_val 
-        FROM ccar_market_risk.historical_sensitivities
-        WHERE business_date >= DATEADD(day, -30, GETDATE())
-        GROUP BY position_id, risk_metric
-    """
-    
-    conn = pyodbc.connect(conn_str)
-    df_history = pd.read_sql(query, conn)
-    conn.close()
-    
-    # 4. Merge and Flag Anomalies
-    merged = pd.merge(df_current, df_history, on=['position_id', 'risk_metric'], how='left')
-    
-    # Avoid division by zero for fixed/low-risk metrics
-    merged['std_val'] = merged['std_val'].replace(0, np.nan) 
-    merged['z_score'] = (merged['metric_value'] - merged['avg_val']) / merged['std_val']
-    
-    # Threshold: Flag anything outside 4 Standard Deviations for CCAR investigation
-    anomalies = merged[merged['z_score'].abs() > 4.0]
-    
-    if not anomalies.empty:
-        print(f"\n[ALERT] Found {len(anomalies)} risk metric anomalies exceeding Z-Score threshold (>4 std dev):")
-        print(anomalies[['position_id', 'asset_class', 'risk_metric', 'metric_value', 'z_score']].head(10))
-        return anomalies
-        
-    print("[SUCCESS] Data reconciliation and anomaly checks passed.")
-    return None
-
-# Example Execution:
-# anomalies_df = troubleshoot_ccar_feed('T_market_risk_feed.csv', 'DRIVER={SQL Server};SERVER=risk_db;DATABASE=ccar;UID=usr;PWD=pwd')
-4. Root Cause Playbook (Common Scenarios)
-
-| Symptoms|	Likely Root Cause	| Remediation Action|
-|------------:|-----------------------------|------------------------------|
-|SQL query returns 0 records for today's date; source file is missing.	| Upstream EOD Batch Delay	| Check upstream batch schedulers (e.g., Airflow, Autosys). Ping the respective asset class Middle Office IT desk to confirm if trade matching or curve generation is running late. |
-| Python script outputs Schema Drift Detected.	 | Upstream System Release |	A column was renamed or added by an upstream system without updating the downstream CCAR data contract.  Map the missing fields manually in the staging ETL view to unblock the feed. |
-| Z-score alerts trigger massively across Interest Rate Greeks.	| Bad Curve Ingestion / Missing Staging Data	| Usually happens when a benchmark curve (like SOFR) fails to construct properly, resulting in 0 or Null discount factors, blowing up sensitivities. Roll back to yesterday’s curve as a proxy if approved by Risk Management. |
-| pyodbc database connection timeout errors.	| Database Lock / High Concurrency	| CCAR calculation windows often experience heavy database load. Run sp_who2 or checking active block locks in SQL to kill orphaned sessions. |
-
-5. Fail-Safe Resolution ProtocolIf the feed cannot be programmatically restored within the regulatory reporting SLA window, initiate the CCAR Business Continuity Protocol:Proxy Ingestion: If approved by the Market Risk Methodology team, run an emergency SQL script to clone the previous business day's risk factors ($T-1$) to serve as a proxy for the missing assets, scaling by any macro indices if required:
-
- INSERT INTO ccar_market_risk.market_sensitivities (business_date, position_id, asset_class, risk_metric, metric_value)
-SELECT '2026-05-16', position_id, asset_class, risk_metric, metric_value
-FROM ccar_market_risk.market_sensitivities
-WHERE business_date = '2026-05-15';
-
-Audit Logging: Record the incident in the CCAR Data Quality Ledger, explicitly noting the percentage of total Risk-Weighted Assets (RWA) impacted by the proxy data to satisfy Federal Reserve SR 15-18 / SR 11-7 validation requirements.
 
