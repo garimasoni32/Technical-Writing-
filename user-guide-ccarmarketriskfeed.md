@@ -25,6 +25,22 @@ The Overwrite (UPSERT) Rule: If a trading desk submits an updated file for an id
 
 **Data Grid Directory**
 
+| Column Name |	Business Meaning |	Format / Allowed Values	| Regulatory Significance |
+|------------:|--------------------|---------------------------|-------------------------|
+|id	| System Record ID |	System-generated integer |	Internal auditing and line-item tracking. |
+|reporting_date	|The specific business day of the trade positions. |	Date (YYYY-MM-DD)	| Establishes the exact historical snapshot required for the regulatory quarter.
+|legal_entity_identifier|	The global alphanumeric identification code of the submitting bank subsidiary.|	20-character string	|Identifies exactly which legal entity holds the risk exposure.|
+|ccar_scenario	|The designated Federal Reserve stress testing economic path.	| BASELINING SEVERELY_ADVERSE INTERNAL_STRESS | Maps the metrics directly to the mandatory stress-testing horizons.| 
+|book_id	| The granular identifier for the trading portfolio.	| String (Must start with BK_)	| Pinpoints the internal desk or risk aggregator responsible for the position.|
+|asset_class	|The broad core financial asset classification.	| EQUITY, FX, CREDIT, IR	|Segregates capital requirements across different market sectors.|
+|var_99_1d|	1-Day 99% Value-at-Risk tracking units.|	Integer Cents (e.g., 1000000)	|Capital adequacy indicator showing the maximum projected loss at a 99% confidence level.|
+|delta	| First-order directional price sensitivity.|	Numeric Decimal|	Measures direct exposure to changes in the underlying asset's price.|
+|gamma	|Second-order acceleration sensitivity.	|Numeric Decimal|	Measures the stability of the Delta value as the market moves rapidly.|
+|vega	|Volatility exposure metric.|	Numeric Decimal	|Tracks how sensitive the portfolio is to sharp movements in implied market volatility.|
+|processed_at	|The system completion time.	|Timestamp with Time Zone|	Establishes proof-of-delivery data lineage for external bank examiners.|
+
+
+
 3. **Critical Analytical Conventions (How to Read the Metrics)**
 
    To prevent severe miscalculations when aggregating files for stress testing reports, analysts must observe the following data transformations:
@@ -39,7 +55,7 @@ The Overwrite (UPSERT) Rule: If a trading desk submits an updated file for an id
    
       the actual exposure is calculated as:
 
-       $$125,000,500 \div 100 = \$1,250,005.00$$
+       $$125,000,500 \ 100 = $1,250,005.00$$
 
    2. Directional Risk Sensitivities (The Greeks)Positive vs. Negative Sensitivities:
 
