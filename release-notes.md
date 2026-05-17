@@ -32,6 +32,11 @@ Protocol Requirement: HTTPS with Content-Encoding: gzip enabled for payloads exc
 Mandatory Headers:
 
 X-Reporting-LEI: The 20-character Legal Entity Identifier of the bank subsidiary.
+
+X-Idempotency-Key: UUIDv4 token to safeguard against duplicate message ingestion on network retries.
+
+Payload Example:
+
 ```python
 {
   "reporting_date": "2026-05-15",
@@ -52,6 +57,6 @@ X-Reporting-LEI: The 20-character Legal Entity Identifier of the bank subsidiary
 }
 ```
 
-X-Idempotency-Key: UUIDv4 token to safeguard against duplicate message ingestion on network retries.
 
-Payload Example:
+
+
