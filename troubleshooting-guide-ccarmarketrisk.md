@@ -216,8 +216,17 @@ def troubleshoot_ccar_feed(file_path, conn_str):
 
 | Symptoms|	Likely Root Cause	| Remediation Action|
 |------------:|-----------------------------|------------------------------|
-|SQL query returns 0 records for today's date; source file is missing.	| Upstream EOD Batch Delay	Check upstream batch schedulers (e.g., Airflow, Autosys). | Ping the respective asset class Middle Office IT desk to confirm if trade matching or curve generation is running late. |
-| Python script outputs Schema Drift Detected.	 | Upstream System Release	A column was renamed or added by an upstream system without updating the downstream CCAR data contract. | Map the missing fields manually in the staging ETL view to unblock the feed. |
+|SQL query returns 0 records for today's date; source file is missing.	| Upstream EOD Batch Delay	| Check upstream batch schedulers (e.g., Airflow, Autosys). Ping the respective asset class Middle Office IT desk to confirm if trade matching or curve generation is running late. |
+| Python script outputs Schema Drift Detected.	 | Upstream System Release |	A column was renamed or added by an upstream system without updating the downstream CCAR data contract.  Map the missing fields manually in the staging ETL view to unblock the feed. |
 | Z-score alerts trigger massively across Interest Rate Greeks.	| Bad Curve Ingestion / Missing Staging Data	| Usually happens when a benchmark curve (like SOFR) fails to construct properly, resulting in 0 or Null discount factors, blowing up sensitivities. Roll back to yesterday’s curve as a proxy if approved by Risk Management. |
 | pyodbc database connection timeout errors.	| Database Lock / High Concurrency	| CCAR calculation windows often experience heavy database load. Run sp_who2 or checking active block locks in SQL to kill orphaned sessions. |
+
+5. Fail-Safe Resolution ProtocolIf the feed cannot be programmatically restored within the regulatory reporting SLA window, initiate the CCAR Business Continuity Protocol:Proxy Ingestion: If approved by the Market Risk Methodology team, run an emergency SQL script to clone the previous business day's risk factors ($T-1$) to serve as a proxy for the missing assets, scaling by any macro indices if required:
+
+ INSERT INTO ccar_market_risk.market_sensitivities (business_date, position_id, asset_class, risk_metric, metric_value)
+SELECT '2026-05-16', position_id, asset_class, risk_metric, metric_value
+FROM ccar_market_risk.market_sensitivities
+WHERE business_date = '2026-05-15';
+
+Audit Logging: Record the incident in the CCAR Data Quality Ledger, explicitly noting the percentage of total Risk-Weighted Assets (RWA) impacted by the proxy data to satisfy Federal Reserve SR 15-18 / SR 11-7 validation requirements.
 
